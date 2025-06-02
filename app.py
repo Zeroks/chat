@@ -4,11 +4,10 @@ import collections
 from flask import Flask
 from flask import render_template
 from flask import request
-#from flask import SQLAlchemy
 
 app = Flask(__name__)
-users_data = [{"name": "test", "age": 20, "hobby": ["test1", "test2"]},
-              {"name": "glebas", "age": 18, "hobby": ["sfdgsdg", "sdfg"]}]
+users_data = [{"name": "glebas", "age": 18 ,"user_id":"1chelovek"},
+              {"name": "antoha", "age": 18 ,"user_id":"2chelovek"}]
 
 dialogs = collections.defaultdict(list)
 
@@ -23,24 +22,23 @@ def create_new_user():
     return new_id
 
 @app.route('/users', methods=['GET'])
-def find_a_users():
+def find_a_user():
     search_results = list(filter(lambda user: request.args.get('q') in user["name"], users_data))
     return search_results
 
 @app.route('/messages/<conversation_id>', methods=['POST'])
-def post_new_messages(conversation_id):
+def post_new_message(conversation_id):
     request_body = request.json
     sender = request_body["sender"]
-    message_text = request_body["message"]
+    message_text = request_body["text"]
     message_id = str(uuid.uuid4())
     dialog_id = sorted(conversation_id.split('_'))
-    if (dialogs.get( f'{dialog_id[0]}_{dialog_id[1]}') or dialogs.get(f'{dialog_id[1]}_{dialog_id[0]}')) or KeyError:
-        dialogs[f'{dialog_id[0]}_{dialog_id[1]}'].append({'text': message_text , 'sender': sender, 'message_id': message_id})
+    dialogs[f'{dialog_id[0]}_{dialog_id[1]}'].append({'text': message_text , 'sender': sender, 'message_id': message_id})
     print(dialogs)
     return message_id
 
 @app.route('/messages/<conversation_id>', methods=['GET'])
-def get_dialogs(conversation_id):
+def get_messages(conversation_id):
     dialog_id = sorted(conversation_id.split('_'))
     result_of_search = dialogs.get(f'{dialog_id[0]}_{dialog_id[1]}')
     if result_of_search == None:
